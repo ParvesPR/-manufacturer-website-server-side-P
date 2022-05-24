@@ -20,9 +20,10 @@ async function run() {
         await client.connect();
 
         const productCollection = client.db('manufacturedb').collection('products');
+        const orderCollection = client.db('manufacturedb').collection('orders');
 
         // GET ALL DATA
-        app.get('/product', async (req, res) => {
+        app.get('/parts', async (req, res) => {
             const query = {};
             const cursor = productCollection.find(query);
             const result = await cursor.toArray();
@@ -30,12 +31,19 @@ async function run() {
         });
 
         // GET ITEM BY PRODUCT ID
-        app.get('/product/:id', async (req, res) => {
+        app.get('/parts/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const product = await productCollection.findOne(query);
             res.send(product);
         });
+
+         // ADD A ORDER
+         app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+         });
     }
 
     finally { }
