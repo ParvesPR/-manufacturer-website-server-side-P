@@ -21,6 +21,7 @@ async function run() {
 
         const productCollection = client.db('manufacturedb').collection('products');
         const orderCollection = client.db('manufacturedb').collection('orders');
+        const userCollection = client.db('manufacturedb').collection('users');
 
         // GET ALL DATA
         app.get('/parts', async (req, res) => {
@@ -38,12 +39,20 @@ async function run() {
             res.send(product);
         });
 
-         // ADD A ORDER
-         app.post('/orders', async (req, res) => {
+        // ADD A ORDER
+        app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             res.send(result);
-         });
+        });
+
+        // FIND ADMIN USER ONLY
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin })
+        });
     }
 
     finally { }
