@@ -46,7 +46,15 @@ async function run() {
             res.send(result);
         });
 
-        // ADD A USER
+        // LOAD A USER ORDER
+        app.get('/orders', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const order = await orderCollection.find(query).toArray();
+            res.send(order)
+        });
+
+        // ADD USERS
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -56,7 +64,8 @@ async function run() {
                 $set: user,
             };
             const result = await userCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5h' })
+            res.send({ result, token });
         })
 
         // FIND ADMIN USER ONLY
