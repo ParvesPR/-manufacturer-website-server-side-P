@@ -131,6 +131,12 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         });
+
+        // MANAGE ALL ORDERS
+        app.get('/allorders', verifyJwt, verifyAdmin, async (req, res) => {
+            const orders = await orderCollection.find().toArray();
+            res.send(orders);
+        });
     }
 
     finally { }
