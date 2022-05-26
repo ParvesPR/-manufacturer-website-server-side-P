@@ -66,7 +66,7 @@ async function run() {
         });
 
         // LOAD ALL USERS
-        app.get('/user', verifyJwt, async (req, res) => {
+        app.get('/user', verifyJwt, verifyAdmin, async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
         });
@@ -123,6 +123,13 @@ async function run() {
             const user = await userCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin })
+        });
+
+        // ADD A PRODUCT
+        app.post('/addproduct', verifyJwt, verifyAdmin, async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
         });
     }
 
