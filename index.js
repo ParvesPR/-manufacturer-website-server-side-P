@@ -38,6 +38,17 @@ async function run() {
         const orderCollection = client.db('manufacturedb').collection('orders');
         const userCollection = client.db('manufacturedb').collection('users');
 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' })
+            }
+        }
+
         // GET ALL DATA
         app.get('/parts', async (req, res) => {
             const query = {};
@@ -95,8 +106,8 @@ async function run() {
             res.send({ result, token });
         });
 
-         // MAKE USER AN ADMIN
-         app.put('/user/admin/:email', verifyJwt, async (req, res) => {
+        // MAKE USER AN ADMIN
+        app.put('/user/admin/:email', verifyJwt, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const updateDoc = {
