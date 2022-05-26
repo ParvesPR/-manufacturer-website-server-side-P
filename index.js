@@ -54,6 +54,12 @@ async function run() {
             res.send(product);
         });
 
+        // LOAD ALL USERS
+        app.get('/user', verifyJwt, async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
+        });
+
         // ADD A ORDER
         app.post('/orders', async (req, res) => {
             const order = req.body;
@@ -87,7 +93,18 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc, options);
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '5h' })
             res.send({ result, token });
-        })
+        });
+
+         // MAKE USER AN ADMIN
+         app.put('/user/admin/:email', verifyJwt, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
 
         // FIND ADMIN USER ONLY
         app.get('/admin/:email', async (req, res) => {
