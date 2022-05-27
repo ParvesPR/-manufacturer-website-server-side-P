@@ -5,6 +5,7 @@ require('dotenv').config();
 const app = express();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // MIDDLEWARE
 app.use(cors());
@@ -161,6 +162,27 @@ async function run() {
             const result = await productCollection.deleteOne(query);
             res.send(result)
         });
+
+        // PRODUCT DETAILS FOR PAYMENT
+        app.get('/product/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await orderCollection.findOne(query);
+            res.send(product);
+        });
+
+        // PAYMENT GATEWAY
+        app.post('/create-payment-intent', verifyJwt, async (req, res) => {
+            const product = req.body;
+            const price = product.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            })
+            res.send({ clientSecret: paymentIntent.client_secret })
+        })
     }
 
     finally { }
