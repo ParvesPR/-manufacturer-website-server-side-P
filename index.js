@@ -145,6 +145,14 @@ async function run() {
             const orders = await orderCollection.find().toArray();
             res.send(orders);
         });
+
+        // MANAGE ALL DATA
+        app.get('/manageproducts', verifyJwt, verifyAdmin, async (req, res) => {
+            const query = {};
+            const cursor = productCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
+        });
     }
 
     finally { }
