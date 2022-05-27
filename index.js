@@ -38,6 +38,7 @@ async function run() {
         const productCollection = client.db('manufacturedb').collection('products');
         const orderCollection = client.db('manufacturedb').collection('orders');
         const userCollection = client.db('manufacturedb').collection('users');
+        const reviewCollection = client.db('manufacturedb').collection('reviews');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -162,6 +163,23 @@ async function run() {
             const result = await productCollection.deleteOne(query);
             res.send(result)
         });
+
+        // POST A REVIEW
+        app.post('/review/:id', verifyJwt, async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result)
+        });
+
+        // GET REVIEW
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
+
+        })
+
 
         // PRODUCT DETAILS FOR PAYMENT
         app.get('/product/:id', verifyJwt, async (req, res) => {
