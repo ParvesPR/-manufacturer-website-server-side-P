@@ -153,6 +153,14 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         });
+
+        // DELETE A PRODUCT BY ADMIN
+        app.delete('/manageproducts/:id', verifyJwt, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(query);
+            res.send(result)
+        });
     }
 
     finally { }
