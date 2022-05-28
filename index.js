@@ -40,6 +40,7 @@ async function run() {
         const userCollection = client.db('manufacturedb').collection('users');
         const reviewCollection = client.db('manufacturedb').collection('reviews');
         const paymentCollection = client.db('manufacturedb').collection('payments');
+        const profileCollection = client.db('manufacturedb').collection('profile');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -67,6 +68,20 @@ async function run() {
             const product = await productCollection.findOne(query);
             res.send(product);
         });
+
+        // MY PROFILE SAVE DATA
+        app.post('/myprofile', async (req, res) => {
+            const newUser = req.body;
+            const result = await profileCollection.insertOne(newUser);
+            res.send(result);
+        });
+
+        // MY PROFILE LOAD DATA
+        app.get('/myprofile/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await profileCollection.findOne({ email: email });
+            res.send(user)
+        })
 
         // LOAD ALL USERS
         app.get('/user', verifyJwt, verifyAdmin, async (req, res) => {
