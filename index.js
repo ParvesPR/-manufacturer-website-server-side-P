@@ -61,6 +61,14 @@ async function run() {
             res.send(result)
         });
 
+        // LOAD DATA FOR HOME PAGE
+        app.get('/homepage', async (req, res) => {
+            const query = {};
+            const cursor = productCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
+        });
+
         // GET ITEM BY PRODUCT ID
         app.get('/parts/:id', async (req, res) => {
             const id = req.params.id;
