@@ -39,6 +39,7 @@ async function run() {
         const orderCollection = client.db('manufacturedb').collection('orders');
         const userCollection = client.db('manufacturedb').collection('users');
         const reviewCollection = client.db('manufacturedb').collection('reviews');
+        const paymentCollection = client.db('manufacturedb').collection('payments');
 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
@@ -180,7 +181,6 @@ async function run() {
 
         })
 
-
         // PRODUCT DETAILS FOR PAYMENT
         app.get('/product/:id', verifyJwt, async (req, res) => {
             const id = req.params.id;
@@ -200,6 +200,22 @@ async function run() {
                 payment_method_types: ['card']
             })
             res.send({ clientSecret: paymentIntent.client_secret })
+        });
+
+        // PAYMENT TRANSACTION DETAILS
+        app.patch('/product/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const result = await paymentCollection.insertOne(payment);
+            const updatedBooking = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(updatedBooking);
         })
     }
 
