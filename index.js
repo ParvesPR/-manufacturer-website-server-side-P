@@ -172,6 +172,14 @@ async function run() {
             res.send(orders);
         });
 
+        // DELETE ALL ORDER 
+        app.delete('/allorders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(query)
+            res.send(result)
+        })
+
         // MANAGE ALL DATA
         app.get('/manageproducts', verifyJwt, verifyAdmin, async (req, res) => {
             const query = {};
@@ -204,7 +212,7 @@ async function run() {
 
         })
 
-        // PRODUCT DETAILS FOR PAYMENT
+        // PRODUCT DETAILS FOR  PAYMENT
         app.get('/product/:id', verifyJwt, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -233,12 +241,30 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     paid: true,
-                    transactionId: payment.transactionId
+                    transactionId: payment.transactionId,
+                    status: payment.status,
                 }
             }
             const result = await paymentCollection.insertOne(payment);
             const updatedBooking = await orderCollection.updateOne(filter, updatedDoc);
             res.send(updatedBooking);
+        });
+
+        // ORDER STATUS
+        app.patch('/orderStatus/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body
+            console.log(payment);
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    status: payment.status,
+                }
+            }
+            const updatedOrder = await orderCollection.updateOne(filter, updatedDoc)
+
+            const result = await paymentCollection.insertOne(payment)
+            res.send(updatedDoc);
         })
     }
 
